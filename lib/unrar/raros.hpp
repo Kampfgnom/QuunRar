@@ -35,6 +35,9 @@
 #endif
 
 #ifdef __APPLE__
+#   ifdef _UNIX
+#       undef _UNIX
+#   endif
   #define _UNIX
   #define _APPLE
 #endif

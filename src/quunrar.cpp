@@ -18,16 +18,20 @@ QuunRarPrivate::QuunRarPrivate() :
 QuunRarPrivate::~QuunRarPrivate()
 {
     // Destroy RAR-internal data structure
-    if(hArcData)
+    if(hArcData) {
         RARCloseArchive(hArcData);
+        hArcData = nullptr;
+    }
 
     // Quit gracefully
     if(job) {
         job->quit();
         job->deleteLater();
+        job = nullptr;
     }
 
     delete archiveData;
+    archiveData = nullptr;
 }
 
 void QuunRarPrivate::initValues()
@@ -64,14 +68,17 @@ void QuunRarPrivate::cleanUpAfterError()
     // Destroy RAR-internal data structure
     if(hArcData) {
         RARCloseArchive(hArcData);
-        hArcData = NULL;
+        hArcData = nullptr;
     }
 
     // Quit running job
     if(job) {
         job->quitOnError();
-        job = 0;
+        job = nullptr;
     }
+
+    delete archiveData;
+    archiveData = nullptr;
 
     // Reset unpacked size
     totalUnpackedSize = 0;
@@ -378,7 +385,6 @@ QString QuunRar::comment() const
 
 unsigned int QuunRar::totalUnpackedSize() const
 {
-    QMutexLocker locker(&d->mutex);
     return d->totalUnpackedSize;
 }
 
@@ -483,6 +489,9 @@ QString QuunRar::errorString() const
 
     switch (e) {
     case OpeningError:
+        if(!d->archiveData)
+            return QLatin1String("The archive could not be initialized");
+
         switch (d->archiveData->OpenResult) {
         case ERAR_NO_MEMORY:
             return QLatin1String("Not enough memory to initialize data structures");

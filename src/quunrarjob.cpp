@@ -186,7 +186,6 @@ void QuunRarJob::run()
         d->archive->testFilesBlocking();
         break;
     }
-    exec();
 }
 
 void QuunRarJob::setCurrentFileName(const QString &fileName)
